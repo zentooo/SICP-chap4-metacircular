@@ -26,9 +26,18 @@
 (define (compound-procedure? p)
   (tagged-list? p 'procedure))
 
+(define (primitive-procedure? p)
+  (tagged-list? p 'primitive))
+
+(define (primitive-implementation proc) (cadr proc))
+
 (define (procedure-parameters p) (cadr p))
 (define (procedure-body) (caddr p))
 (define (procedure-environment) (cadddr p))
+
+(define apply-in-underlying-scheme apply)
+(define (apply-primitive-procedure proc args)
+  (apply-in-underlying-scheme (primitive-implementation proc) args))
 
 
 (define (operator exp) (car exp))

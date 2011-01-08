@@ -84,4 +84,34 @@
 (test* "extractor-clause?" #t (extractor-clause? '((assoc b ((a 1) (b 2))) => cadr)))
 (test* "extractor-target-function" 'cadr (extractor-target-function '((assoc b ((a 1) (b 2))) => cadr)))
 
+(use eval.env)
+(test-section "env")
+
+(define sample-environment1 (extend-environment '(var1 var2) '(val1 val2) '()))
+(test* "extend-environment1" '(((var1 var2) val1 val2)) sample-environment1)
+
+(define sample-environment2 (extend-environment '(var3 var4) '(val3 val4) sample-environment1))
+(test* "extend-environment2" '(((var3 var4) val3 val4)  ((var1 var2) val1 val2)) sample-environment2)
+
+(test* "lookup-variable-value-top" 'val3 (lookup-variable-value 'var3 sample-environment2))
+(test* "lookup-variable-value-next" 'val1 (lookup-variable-value 'var1 sample-environment2))
+
+(set-variable-value! 'var3 'valx sample-environment2)
+(test* "set-variable-value-top" 'valx (lookup-variable-value 'var3 sample-environment2))
+(set-variable-value! 'var3 'val3 sample-environment2)
+
+(set-variable-value! 'var1 'valx sample-environment2)
+(test* "set-variable-value-next" 'valx (lookup-variable-value 'var1 sample-environment2))
+(set-variable-value! 'var1 'val1 sample-environment2)
+
+(define-variable! 'var5 'val5 sample-environment2)
+(test* "define-variable!" 'val5 (lookup-variable-value 'var5 sample-environment2))
+
+(make-unbound! 'var5 sample-environment2)
+(test* "make-unbound!" (test-error) (lookup-variable-value 'var5 sample-environment2))
+
+(define initial-environment (setup-environment))
+(test* "initial-environment-1" #t (lookup-variable-value '#t initial-environment))
+(test* "initial-environment-3" `(primitive ,car) (lookup-variable-value 'car initial-environment))
+
 (test-end)
