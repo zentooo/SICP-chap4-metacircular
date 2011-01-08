@@ -13,6 +13,8 @@
         [(and? exp) (eval-and exp env)]
         [(or? exp) (eval-or exp env)]
         [(lambda? exp) (make-procedure (lambda-parameters exp) (lambda-body exp) env)]
+        [(let? exp) (eval (let->conbination exp) env)]
+        [(let*? exp) (eval (let*->nested-lets exp) env)]
         [(begin? exp) (eval-sequence (begin-actions exp) env)]
         [(cond? exp) (eval (cond->if exp env))]
         [(application? exp) (apply (eval (operator exp) env) (list-of-values (operands exp) env))]
@@ -139,6 +141,25 @@
 (define (lambda-parameters exp) (cadr exp))
 
 (define (lambda-body exp) (cddr exp))
+
+
+; let?
+(define (let? exp) (tagged-list? exp 'let))
+(define (let*? exp) (tagged-list? exp 'let*))
+
+(define (let-bindings exp)
+  (cadr exp))
+
+(define (let-body exp)
+  (caddr exp))
+
+(define (let->combination let-clause)
+  (let ((bindings (let-bindings let-clause)) (body (let-body let-clause)))
+    `((lambda ,(map car bindings) ,body) ,@(map cadr bindings))))
+
+(define (let*->nested-lets let*-clause)
+  (let ((bindings (let-bindings let*-clause)) (body (let-body let*-clause)))
+    (fold-right (lambda (x y) `(let (,x) ,y)) body bindings)))
 
 
 ; begin?

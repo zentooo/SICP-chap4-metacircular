@@ -37,6 +37,12 @@
 (test* "lambda-parameters" 'foo (lambda-parameters '(lambda foo bar)))
 (test* "lambda-body" '(bar) (lambda-body '(lambda foo bar)))
 
+(test-section "let?")
+(test* "let-bindings" '((var1 exp1) (var2 exp2)) (let-bindings '(let ((var1 exp1) (var2 exp2)) (list 1 2 3))))
+(test* "let-body" '(list 1 2 3) (let-body '(let ((var1 exp1) (var2 exp2)) (list 1 2 3))))
+(test* "let->combination" '((lambda (var1 var2) (list 1 2 3)) exp1 exp2) (let->combination '(let ((var1 exp1) (var2 exp2)) (list 1 2 3))))
+(test* "let*->nested-lets" '(let ((x 1)) (let ((y x)) (list 1 2 3))) (let*->nested-lets '(let* ((x 1) (y x)) (list 1 2 3))))
+
 (test-section "if?")
 (test* "if?-true" #t (if? '(if 1 2 3)))
 (test* "if?-false" #f (if? '(foo 1 2 3)))
